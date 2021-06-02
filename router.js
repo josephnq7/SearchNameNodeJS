@@ -1,11 +1,13 @@
 var Profile = require("./profile.js");
+var render = require('./renderer.js');
 
 function home(request, response) {
     if (request.url === '/') {
         response.writeHead(200, {'Content-Type': 'text/plain'});
-        response.write("Header \n");
-        response.write('Search \n');
-        response.end('Footer \n');
+        render.view('header', {}, response);
+        render.view('search', {}, response);
+        render.view('footer', {}, response);
+        response.end();
     }
 }
 
@@ -13,7 +15,7 @@ function user(request, response) {
     var username = request.url.replace('/', '');
     if (username.length > 0) {
         response.writeHead(200, {'Content-Type': 'text/plain'});
-        response.write("Header \n");
+        render.view('header', {}, response);
 
         //get json from Treehouse
         var studentProfile = new Profile(username);
@@ -31,14 +33,17 @@ function user(request, response) {
             };
 
             //simple response
-            response.write(values.username + " has " + values.badges + " badges \n");
-            response.end('Footer \n');
+            render.view('profile', values, response);
+            render.view('footer', {}, response);
+            response.end();
         });
 
         // on "error"
         studentProfile.on("error", function(error) {
-            response.write(error.message + "\n");
-            response.end('Footer \n');
+            render.view('error', {errorMessage: error.message}, response);
+            render.view('search', {}, response);
+            render.view('footer', {}, response);
+            response.end();
         });
     }
 }
